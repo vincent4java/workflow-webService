@@ -8,7 +8,6 @@
                      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
                      http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-	<import resource="classpath:webService-service-applicationContext.xml" />
-	<!-- <import resource="classpath:user-mongo-applicationContext.xml" /> -->
+	<import resource="classpath:workflow-service-webservice.xml" />
 </beans>
 
