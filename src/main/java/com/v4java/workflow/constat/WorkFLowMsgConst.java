@@ -13,5 +13,17 @@ public class WorkFLowMsgConst implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 5841547140667620228L;
+	
+	private int isSuccess;
+
+	public int getIsSuccess() {
+		return isSuccess;
+	}
+
+	public void setIsSuccess(int isSuccess) {
+		this.isSuccess = isSuccess;
+	}
+	
+	
 
 }
