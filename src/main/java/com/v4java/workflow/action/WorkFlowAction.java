@@ -104,7 +104,7 @@ public class WorkFlowAction {
 		try {
 			Integer n =null;
 			setUerJobs(userVO);
-			if (userVO.getJobsIds()==null&&userVO.getJobsIds().size()==0) {
+			if (userVO.getJobsIds()==null||userVO.getJobsIds().size()==0) {
 				n = WorkFlowErrorConst.USER_NO_JOBS;
 			}else {
 				n = workFlowService.doWorkFlow(workFlowId, userVO, FlowConst.AGREE_TRUE);
