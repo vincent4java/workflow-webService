@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.v4java.workflow.constant.FlowConst;
+import com.v4java.workflow.constant.WorkFlowErrorConst;
 import com.v4java.workflow.constat.WorkFLowMsgConst;
 import com.v4java.workflow.pojo.JobsUser;
 import com.v4java.workflow.pojo.WorkFlow;
@@ -78,14 +80,12 @@ public class WorkFlowAction {
 		flow.setJson(json);
 		flow.setWorkFlowCode(workFlowCode);
 		try {
-			List<JobsUser> jobsUsers = jobsUserService.selectjobsUserByUserCodeAndSystemId(jobsUserQuery);
-			List<Integer> jobIds  = new ArrayList<Integer>();
-			for (JobsUser jobsUser : jobsUsers) {
-				jobIds.add(jobsUser.getJobsId());
-			}
-			userVO.setJobsIds(jobIds);
+			setUerJobs(userVO);
 			int n =workFlowService.insertWorkFlow(flow, userVO);
 			workFLowMsgConst.setIsSuccess(n);
+			if (n!=1) {
+				workFLowMsgConst.setMsg(WorkFlowErrorConst.MSG[-n]);
+			}
 		} catch (Exception e) {
 			logger.error("查询--"+systemId+"--系统中用户"+userCode+"--"+userName+"待办审批任务错误", e);
 		}
@@ -93,4 +93,48 @@ public class WorkFlowAction {
 		return workFLowMsgConst;
 	}
 	
+	
+	@RequestMapping(value = "/agree/{systemId}/{workFlowId}/{userCode}/{userName}")
+	public @ResponseBody WorkFLowMsgConst agree(@PathVariable Integer systemId,@PathVariable Integer workFlowId, @PathVariable String userCode,@PathVariable String userName){
+		WorkFLowMsgConst workFLowMsgConst = new WorkFLowMsgConst();
+		UserVO userVO = new UserVO();
+		userVO.setUserCode(userCode);
+		userVO.setUserName(userName);
+		userVO.setSystemId(systemId);
+		try {
+			setUerJobs(userVO);
+			int n = workFlowService.doWorkFlow(workFlowId, userVO, FlowConst.AGREE_TRUE);
+			workFLowMsgConst.setIsSuccess(n);
+		} catch (Exception e) {
+			//logger.error("查询--"+systemId+"--系统中用户"+userCode+"--"+userName+"待办审批任务错误", e);
+		}
+		return workFLowMsgConst;
+	}
+
+	
+	public @ResponseBody WorkFLowMsgConst disAgree(){
+
+		return null;
+	}
+
+
+	private void setUerJobs(UserVO userVO) {
+		JobsUserQuery jobsUserQuery = new JobsUserQuery();
+		jobsUserQuery.setSystemId(userVO.getSystemId());
+		jobsUserQuery.setUserCode(userVO.getUserCode());
+		List<JobsUser> jobsUsers;
+		try {
+			jobsUsers = jobsUserService.selectjobsUserByUserCodeAndSystemId(jobsUserQuery);
+			List<Integer> jobIds  = new ArrayList<Integer>();
+			for (JobsUser jobsUser : jobsUsers) {
+				jobIds.add(jobsUser.getJobsId());
+			}
+			userVO.setJobsIds(jobIds);
+			jobIds = null;
+			jobsUserQuery = null;
+		} catch (Exception e) {
+		}
+	
+	}
 }
+
