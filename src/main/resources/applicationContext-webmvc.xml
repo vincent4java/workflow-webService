@@ -21,21 +21,6 @@
 			expression="org.springframework.stereotype.Controller" />
 	</context:component-scan>
 
-	<!-- 拦截器 -->
-	<bean id="permissionInterceptor" class="com.v4java.workflow.interceptor.PermissionInterceptor"/>
-	<!-- 拦截器 -->
-
-	
- <!--拦截栈  -->
-	<!-- <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"> -->
-	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
-		<property name="interceptors">
-			<list>
-				<ref bean="permissionInterceptor"/>
-				
-			</list>
-		</property>
-	</bean>
 
 
 
