@@ -102,8 +102,19 @@ public class WorkFlowAction {
 		userVO.setUserName(userName);
 		userVO.setSystemId(systemId);
 		try {
+			Integer n =null;
 			setUerJobs(userVO);
-			int n = workFlowService.doWorkFlow(workFlowId, userVO, FlowConst.AGREE_TRUE);
+			if (userVO.getJobsIds()==null&&userVO.getJobsIds().size()==0) {
+				n = WorkFlowErrorConst.USER_NO_JOBS;
+			}else {
+				n = workFlowService.doWorkFlow(workFlowId, userVO, FlowConst.AGREE_TRUE);
+			}
+			if (n!=null&&n!=1) {
+				workFLowMsgConst.setIsSuccess(n);
+				workFLowMsgConst.setMsg(WorkFlowErrorConst.MSG[-n]);
+			}else {
+				workFLowMsgConst.setMsg("成功");
+			}
 			workFLowMsgConst.setIsSuccess(n);
 		} catch (Exception e) {
 			//logger.error("查询--"+systemId+"--系统中用户"+userCode+"--"+userName+"待办审批任务错误", e);
