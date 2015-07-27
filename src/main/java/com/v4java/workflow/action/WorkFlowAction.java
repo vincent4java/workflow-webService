@@ -45,8 +45,8 @@ public class WorkFlowAction {
 	@RequestMapping(value = "/getWorkFlow/{systemId}/{userCode}")
 	public @ResponseBody BTables<WorkFlowVO> getWorkFlow(@PathVariable Integer systemId,@PathVariable String userCode){
 		WorkFlowQuery workFlowQuery = new WorkFlowQuery();
-		workFlowQuery.setSystemId(systemId);
 		workFlowQuery.setUserCode(userCode);
+		workFlowQuery.setSystemId(systemId);
 		BTables<WorkFlowVO> bTables = new BTables<WorkFlowVO>();
 		try {
 			List<WorkFlowVO> workFlowVOs = workFlowService.findUserWorkFlowVOByUserCodeAndSystemId(workFlowQuery);

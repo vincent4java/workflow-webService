@@ -1,14 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  	<parent>
-		<groupId>com.vincent</groupId>
-		<artifactId>lostandlove</artifactId>
+    <parent>
+		<groupId>com.v4java</groupId>
+		<artifactId>workflow</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-		<relativePath>../lostandlove</relativePath>
+		<relativePath>../workflow</relativePath>
 	</parent>
-	
-  <groupId>org.workflow</groupId>
   <artifactId>workflow-webService</artifactId>
   <packaging>war</packaging>
   <name>workflow-webService Maven Webapp</name>
@@ -24,12 +22,10 @@
 		<dependency>
 			<groupId>com.v4java</groupId>
 			<artifactId>workflow-service</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-		  	<groupId>org.workflow</groupId>
+		  	<groupId>com.v4java</groupId>
  			 <artifactId>workflow-redis</artifactId>
- 			 <version>0.0.1-SNAPSHOT</version>
   		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -62,7 +58,7 @@
  
  
 	<build>
-		<finalName>workflow-service</finalName>
+		<finalName>workflow-webService</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

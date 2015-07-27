@@ -56,10 +56,6 @@
             org.springframework.web.context.request.RequestContextListener    
         </listener-class>    
 	</listener> 
-	
-<!-- 	<listener>
-        <listener-class>com.yule.listener.InitListener</listener-class>
-    </listener> -->
     
 	<!-- 配置Spring核心控制器 -->
 	<servlet>
@@ -80,23 +76,10 @@
 	
 	<context-param>
         <param-name>webAppRootKey</param-name>
-        <param-value>lostandlove-admin-web</param-value>
+        <param-value>workflow-webService</param-value>
     </context-param>
-<!-- 	<servlet>
-		<servlet-name>CaptchaServlet</servlet-name>
-		<servlet-class>
-			com.yule.servlet.CaptchaServlet
-		</servlet-class>
-	</servlet> -->
 	
     <session-config>
 	      <session-timeout>30</session-timeout>
 	</session-config>
-	
-<!-- 	<servlet-mapping>
-		<servlet-name>CaptchaServlet</servlet-name>
-		<url-pattern>/captcha.jpg</url-pattern>
-	</servlet-mapping> -->
-	
-    
 </web-app>
