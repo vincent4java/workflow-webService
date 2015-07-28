@@ -135,7 +135,7 @@ public class WorkFlowAction {
 		jobsUserQuery.setUserCode(userVO.getUserCode());
 		List<JobsUser> jobsUsers;
 		try {
-			jobsUsers = jobsUserService.selectjobsUserByUserCodeAndSystemId(jobsUserQuery);
+			jobsUsers = jobsUserService.findjobsUserByUserCodeAndSystemId(jobsUserQuery);
 			List<Integer> jobIds  = new ArrayList<Integer>();
 			for (JobsUser jobsUser : jobsUsers) {
 				jobIds.add(jobsUser.getJobsId());
