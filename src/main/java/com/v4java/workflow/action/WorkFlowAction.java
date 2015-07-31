@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.v4java.utils.DateUtil;
 import com.v4java.workflow.constant.FlowConst;
 import com.v4java.workflow.constant.WorkFlowErrorConst;
 import com.v4java.workflow.constat.WorkFLowMsgConst;
@@ -50,6 +51,10 @@ public class WorkFlowAction {
 		BTables<WorkFlowVO> bTables = new BTables<WorkFlowVO>();
 		try {
 			List<WorkFlowVO> workFlowVOs = workFlowService.findUserWorkFlowVOByUserCodeAndSystemId(workFlowQuery);
+			for (WorkFlowVO workFlowVO : workFlowVOs) {
+				workFlowVO.setCreateTimeName(DateUtil.datetimeToStr(workFlowVO.getCreateTime()));
+				workFlowVO.setUpdateTimeName(DateUtil.datetimeToStr(workFlowVO.getUpdateTime()));
+			}
 			int count = workFlowService.findUserWorkFlowVOCountByUserCodeAndSystemId(workFlowQuery);
 			if (workFlowVOs != null && workFlowVOs.size() !=0) {
 				bTables.setRows(workFlowVOs);
@@ -94,8 +99,8 @@ public class WorkFlowAction {
 	}
 	
 	
-	@RequestMapping(value = "/agree/{systemId}/{workFlowId}/{userCode}/{userName}")
-	public @ResponseBody WorkFLowMsgConst agree(@PathVariable Integer systemId,@PathVariable Integer workFlowId, @PathVariable String userCode,@PathVariable String userName){
+	@RequestMapping(value = "/agree/{systemId}/{workFlowId}/{userCode}/{userName}/{isAgree}")
+	public @ResponseBody WorkFLowMsgConst agree(@PathVariable Integer systemId,@PathVariable Integer workFlowId, @PathVariable String userCode,@PathVariable String userName,@PathVariable Integer isAgree){
 		WorkFLowMsgConst workFLowMsgConst = new WorkFLowMsgConst();
 		UserVO userVO = new UserVO();
 		userVO.setUserCode(userCode);
@@ -107,7 +112,7 @@ public class WorkFlowAction {
 			if (userVO.getJobsIds()==null||userVO.getJobsIds().size()==0) {
 				n = WorkFlowErrorConst.USER_NO_JOBS;
 			}else {
-				n = workFlowService.doWorkFlow(workFlowId, userVO, FlowConst.AGREE_TRUE);
+				n = workFlowService.doWorkFlow(workFlowId, userVO, isAgree);
 			}
 			if (n!=null&&n!=1) {
 				workFLowMsgConst.setIsSuccess(n);
