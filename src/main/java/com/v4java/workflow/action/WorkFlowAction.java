@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.v4java.utils.DateUtil;
-import com.v4java.workflow.constant.FlowConst;
 import com.v4java.workflow.constant.WorkFlowErrorConst;
 import com.v4java.workflow.constat.WorkFLowMsgConst;
 import com.v4java.workflow.pojo.JobsUser;
@@ -43,11 +42,12 @@ public class WorkFlowAction {
 	}
 
 	
-	@RequestMapping(value = "/getWorkFlow/{systemId}/{userCode}")
-	public @ResponseBody BTables<WorkFlowVO> getWorkFlow(@PathVariable Integer systemId,@PathVariable String userCode){
+	@RequestMapping(value = "/getWorkFlow/{systemId}/{userCode}/{busyTypeId}")
+	public @ResponseBody BTables<WorkFlowVO> getWorkFlow(@PathVariable Integer systemId,@PathVariable String userCode,@PathVariable Integer busyTypeId){
 		WorkFlowQuery workFlowQuery = new WorkFlowQuery();
 		workFlowQuery.setUserCode(userCode);
 		workFlowQuery.setSystemId(systemId);
+		workFlowQuery.setBusyTypeId(busyTypeId);
 		BTables<WorkFlowVO> bTables = new BTables<WorkFlowVO>();
 		try {
 			List<WorkFlowVO> workFlowVOs = workFlowService.findUserWorkFlowVOByUserCodeAndSystemId(workFlowQuery);
@@ -88,6 +88,7 @@ public class WorkFlowAction {
 			setUerJobs(userVO);
 			int n =workFlowService.insertWorkFlow(flow, userVO);
 			workFLowMsgConst.setIsSuccess(n);
+			workFLowMsgConst.setWorkFlow(flow);
 			if (n!=1) {
 				workFLowMsgConst.setMsg(WorkFlowErrorConst.MSG[-n]);
 			}
@@ -106,13 +107,16 @@ public class WorkFlowAction {
 		userVO.setUserCode(userCode);
 		userVO.setUserName(userName);
 		userVO.setSystemId(systemId);
+		WorkFlow workFlow = new WorkFlow();
 		try {
 			Integer n =null;
 			setUerJobs(userVO);
 			if (userVO.getJobsIds()==null||userVO.getJobsIds().size()==0) {
 				n = WorkFlowErrorConst.USER_NO_JOBS;
 			}else {
-				n = workFlowService.doWorkFlow(workFlowId, userVO, isAgree);
+				workFlow.setId(workFlowId);
+				n = workFlowService.doWorkFlow(workFlow, userVO, isAgree);
+				workFLowMsgConst.setWorkFlow(workFlow);
 			}
 			if (n!=null&&n!=1) {
 				workFLowMsgConst.setIsSuccess(n);
