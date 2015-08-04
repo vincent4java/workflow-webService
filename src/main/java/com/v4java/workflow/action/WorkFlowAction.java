@@ -42,12 +42,14 @@ public class WorkFlowAction {
 	}
 
 	
-	@RequestMapping(value = "/getWorkFlow/{systemId}/{userCode}/{busyTypeId}")
-	public @ResponseBody BTables<WorkFlowVO> getWorkFlow(@PathVariable Integer systemId,@PathVariable String userCode,@PathVariable Integer busyTypeId){
+	@RequestMapping(value = "/getWorkFlow/{systemId}/{userCode}/{busyTypeId}/{offset}/{limit}")
+	public @ResponseBody BTables<WorkFlowVO> getWorkFlow(@PathVariable Integer systemId,@PathVariable String userCode,@PathVariable Integer busyTypeId,@PathVariable Integer offset,@PathVariable Integer limit){
 		WorkFlowQuery workFlowQuery = new WorkFlowQuery();
 		workFlowQuery.setUserCode(userCode);
 		workFlowQuery.setSystemId(systemId);
 		workFlowQuery.setBusyTypeId(busyTypeId);
+		workFlowQuery.setOffset(offset);
+		workFlowQuery.setLimit(limit);
 		BTables<WorkFlowVO> bTables = new BTables<WorkFlowVO>();
 		try {
 			List<WorkFlowVO> workFlowVOs = workFlowService.findUserWorkFlowVOByUserCodeAndSystemId(workFlowQuery);
