@@ -16,6 +16,7 @@ import com.v4java.workflow.constant.WorkFlowErrorConst;
 import com.v4java.workflow.constat.WorkFLowMsgConst;
 import com.v4java.workflow.pojo.JobsUser;
 import com.v4java.workflow.pojo.WorkFlow;
+import com.v4java.workflow.pojo.Xf9System;
 import com.v4java.workflow.query.webservice.JobsUserQuery;
 import com.v4java.workflow.query.webservice.WorkFlowQuery;
 import com.v4java.workflow.service.webservice.IJobsUserService;
@@ -27,7 +28,7 @@ import com.v4java.workflow.vo.webservice.WorkFlowVO;
 	
 @Controller
 @Scope("prototype")
-public class WorkFlowAction {
+public class WorkFlowAction extends BaseAction{
 	
 	
 	@Autowired
@@ -42,16 +43,21 @@ public class WorkFlowAction {
 	}
 
 	
-	@RequestMapping(value = "/getWorkFlow/{systemId}/{userCode}/{busyTypeId}/{offset}/{limit}")
-	public @ResponseBody BTables<WorkFlowVO> getWorkFlow(@PathVariable Integer systemId,@PathVariable String userCode,@PathVariable Integer busyTypeId,@PathVariable Integer offset,@PathVariable Integer limit){
+	@RequestMapping(value = "/getWorkFlow/{systemCode}/{userCode}/{busyTypeId}/{offset}/{limit}")
+	public @ResponseBody BTables<WorkFlowVO> getWorkFlow(@PathVariable String systemCode,@PathVariable String userCode,@PathVariable Integer busyTypeId,@PathVariable Integer offset,@PathVariable Integer limit){
+		
 		WorkFlowQuery workFlowQuery = new WorkFlowQuery();
 		workFlowQuery.setUserCode(userCode);
-		workFlowQuery.setSystemId(systemId);
 		workFlowQuery.setBusyTypeId(busyTypeId);
 		workFlowQuery.setOffset(offset);
 		workFlowQuery.setLimit(limit);
 		BTables<WorkFlowVO> bTables = new BTables<WorkFlowVO>();
 		try {
+			Xf9System system = getXf9System(systemCode);
+			if (system==null||system.getStatus()==1) {
+				return null;
+			}
+			workFlowQuery.setSystemId(system.getId());
 			List<WorkFlowVO> workFlowVOs = workFlowService.findUserWorkFlowVOByUserCodeAndSystemId(workFlowQuery);
 			for (WorkFlowVO workFlowVO : workFlowVOs) {
 				workFlowVO.setCreateTimeName(DateUtil.datetimeToStr(workFlowVO.getCreateTime()));
@@ -71,22 +77,27 @@ public class WorkFlowAction {
 	
 	
 	
-	@RequestMapping(value = "/submitWorkFlow/{systemId}/{busyTypeId}/{userCode}/{userName}/{workFlowCode}/{json}")
-	public @ResponseBody WorkFLowMsgConst submitWorkFlow(@PathVariable Integer systemId,@PathVariable Integer busyTypeId, @PathVariable String userCode, @PathVariable String userName, @PathVariable String  workFlowCode, @PathVariable String  json){
+	@RequestMapping(value = "/submitWorkFlow/{systemCode}/{busyTypeId}/{userCode}/{userName}/{workFlowCode}/{json}")
+	public @ResponseBody WorkFLowMsgConst submitWorkFlow(@PathVariable String systemCode,@PathVariable Integer busyTypeId, @PathVariable String userCode, @PathVariable String userName, @PathVariable String  workFlowCode, @PathVariable String  json){
 		WorkFLowMsgConst workFLowMsgConst = new WorkFLowMsgConst();
 		JobsUserQuery jobsUserQuery = new JobsUserQuery();
-		jobsUserQuery.setSystemId(systemId);
 		jobsUserQuery.setUserCode(userCode);
 		UserVO userVO = new UserVO();
-		userVO.setSystemId(systemId);
 		userVO.setUserCode(userCode);
 		userVO.setUserName(userName);
 		WorkFlow flow = new WorkFlow();
 		flow.setBusyTypeId(busyTypeId);
-		flow.setSystemId(systemId);
 		flow.setJson(json);
 		flow.setWorkFlowCode(workFlowCode);
 		try {
+			Xf9System system = getXf9System(systemCode);
+			if (system==null||system.getStatus()==1) {
+				return null;
+			}
+			
+			jobsUserQuery.setSystemId(system.getId());
+			userVO.setSystemId(system.getId());
+			flow.setSystemId(system.getId());
 			setUerJobs(userVO);
 			int n =workFlowService.insertWorkFlow(flow, userVO);
 			workFLowMsgConst.setIsSuccess(n);
@@ -95,22 +106,26 @@ public class WorkFlowAction {
 				workFLowMsgConst.setMsg(WorkFlowErrorConst.MSG[-n]);
 			}
 		} catch (Exception e) {
-			logger.error("查询--"+systemId+"--系统中用户"+userCode+"--"+userName+"待办审批任务错误", e);
+			logger.error("查询--"+systemCode+"--系统中用户"+userCode+"--"+userName+"待办审批任务错误", e);
 		}
 		
 		return workFLowMsgConst;
 	}
 	
 	
-	@RequestMapping(value = "/agree/{systemId}/{workFlowId}/{userCode}/{userName}/{isAgree}")
-	public @ResponseBody WorkFLowMsgConst agree(@PathVariable Integer systemId,@PathVariable Integer workFlowId, @PathVariable String userCode,@PathVariable String userName,@PathVariable Integer isAgree){
+	@RequestMapping(value = "/agree/{systemCode}/{workFlowId}/{userCode}/{userName}/{isAgree}")
+	public @ResponseBody WorkFLowMsgConst agree(@PathVariable String systemCode,@PathVariable Integer workFlowId, @PathVariable String userCode,@PathVariable String userName,@PathVariable Integer isAgree){
 		WorkFLowMsgConst workFLowMsgConst = new WorkFLowMsgConst();
 		UserVO userVO = new UserVO();
 		userVO.setUserCode(userCode);
 		userVO.setUserName(userName);
-		userVO.setSystemId(systemId);
 		WorkFlow workFlow = new WorkFlow();
 		try {
+			Xf9System system = getXf9System(systemCode);
+			if (system==null||system.getStatus()==1) {
+				return null;
+			}
+			userVO.setSystemId(system.getId());
 			Integer n =null;
 			setUerJobs(userVO);
 			if (userVO.getJobsIds()==null||userVO.getJobsIds().size()==0) {
@@ -131,12 +146,6 @@ public class WorkFlowAction {
 			//logger.error("查询--"+systemId+"--系统中用户"+userCode+"--"+userName+"待办审批任务错误", e);
 		}
 		return workFLowMsgConst;
-	}
-
-	
-	public @ResponseBody WorkFLowMsgConst disAgree(){
-
-		return null;
 	}
 
 
