@@ -174,7 +174,30 @@ public class WorkFlowAction extends BaseAction{
 		return workFLowMsg;
 	}
 
-
+	@RequestMapping(value = "/updateWorkFLowJson",method = RequestMethod.POST)
+	public @ResponseBody WorkFLowMsg updateWorkFLowJson(@RequestBody WorkFlowQuery workFlowQuery){
+		WorkFLowMsg workFLowMsg = new WorkFLowMsg();
+		try {
+			WorkFlow workFlow = new WorkFlow();
+			workFlow.setId(workFlowQuery.getWorkFlowId());
+			workFlow.setJson(workFlowQuery.getJson());
+			workFlowService.updateWorkFlowJson(workFlow);
+		} catch (Exception e) {
+			StringBuffer error = new StringBuffer();
+			error.append(workFlowQuery.getSystemCode());
+			error.append("系统中用户");
+			error.append(workFlowQuery.getUserCode());
+			error.append("--");
+			error.append(workFlowQuery.getUserName());
+			error.append("更改id为");
+			error.append(workFlowQuery.getWorkFlowId());
+			error.append("任务json失败");
+			logger.error(error.toString(), e);
+			workFLowMsg.setMsg("系统错误");
+		}
+		return workFLowMsg;
+		
+	}
 	private void setUerJobs(UserVO userVO) {
 		JobsUserQuery jobsUserQuery = new JobsUserQuery();
 		jobsUserQuery.setSystemId(userVO.getSystemId());
