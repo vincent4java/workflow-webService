@@ -1,6 +1,5 @@
 package com.v4java.workflow.action;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -16,12 +15,10 @@ import com.v4java.utils.DateUtil;
 import com.v4java.workflow.constant.WorkFlowErrorConst;
 import com.v4java.workflow.constat.WorkFLowMsg;
 import com.v4java.workflow.constat.WorkFLowMsgConst;
-import com.v4java.workflow.pojo.JobsUser;
 import com.v4java.workflow.pojo.WorkFlow;
 import com.v4java.workflow.pojo.Xf9System;
 import com.v4java.workflow.query.webservice.JobsUserQuery;
 import com.v4java.workflow.query.webservice.WorkFlowQuery;
-import com.v4java.workflow.service.webservice.IJobsUserService;
 import com.v4java.workflow.service.webservice.IWorkFlowService;
 import com.v4java.workflow.vo.BTables;
 import com.v4java.workflow.vo.webservice.UserVO;
@@ -35,8 +32,6 @@ public class WorkFlowAction extends BaseAction{
 	
 	@Autowired
 	private IWorkFlowService workFlowService;
-	@Autowired
-	private IJobsUserService jobsUserService;
 	private static final Logger logger = Logger.getLogger(WorkFlowAction.class);
 	
 	@RequestMapping(value = "/insertWorkFlow")
@@ -101,10 +96,10 @@ public class WorkFlowAction extends BaseAction{
 				return workFLowMsg;
 			}
 			jobsUserQuery.setSystemId(system.getId());
-			userVO.setSystemId(system.getId());
 			flow.setSystemId(system.getId());
 			flow.setName(workFlowQuery.getName());
-			setUerJobs(userVO);
+			userVO.setSystemId(system.getId());
+			setUerJobs(userVO,workFlowQuery.getSystemCode());
 			int n =workFlowService.insertWorkFlow(flow, userVO);
 			workFLowMsg.setIsSuccess(n);
 			workFLowMsg.setWorkFlow(flow);
@@ -141,9 +136,9 @@ public class WorkFlowAction extends BaseAction{
 				workFLowMsg.setMsg(WorkFlowErrorConst.MSG[WorkFlowErrorConst.SYSTEM_NOT]);
 				return workFLowMsg;
 			}
-			userVO.setSystemId(system.getId());
 			Integer n =null;
-			setUerJobs(userVO);
+			userVO.setSystemId(system.getId());
+			setUerJobs(userVO,workFlowQuery.getSystemCode());
 			if (userVO.getJobsIds()==null||userVO.getJobsIds().size()==0) {
 				n = WorkFlowErrorConst.USER_NO_JOBS;
 			}else {
@@ -198,23 +193,6 @@ public class WorkFlowAction extends BaseAction{
 		return workFLowMsg;
 		
 	}
-	private void setUerJobs(UserVO userVO) {
-		JobsUserQuery jobsUserQuery = new JobsUserQuery();
-		jobsUserQuery.setSystemId(userVO.getSystemId());
-		jobsUserQuery.setUserCode(userVO.getUserCode());
-		List<JobsUser> jobsUsers;
-		try {
-			jobsUsers = jobsUserService.findjobsUserByUserCodeAndSystemId(jobsUserQuery);
-			List<Integer> jobIds  = new ArrayList<Integer>();
-			for (JobsUser jobsUser : jobsUsers) {
-				jobIds.add(jobsUser.getJobsId());
-			}
-			userVO.setJobsIds(jobIds);
-			jobIds = null;
-			jobsUserQuery = null;
-		} catch (Exception e) {
-		}
-	
-	}
+
 }
 
