@@ -5,12 +5,14 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.v4java.workflow.pojo.ApproveLog;
 import com.v4java.workflow.pojo.Xf9System;
+import com.v4java.workflow.query.ApproveLogQuery;
 import com.v4java.workflow.service.webservice.IApproveService;
 
 @Controller
@@ -21,14 +23,14 @@ public class ApproveLogAction extends BaseAction{
 	private IApproveService approveService;
 
 
-	@RequestMapping(value = "/getApproveLogByWorkflowId/{workflowId}/{systemCode}")
-	public @ResponseBody List<ApproveLog> getApproveLogByWorkflowId(@PathVariable Integer workflowId,@PathVariable String systemCode){
+	@RequestMapping(value = "/getApproveLogByWorkflowId",method = RequestMethod.POST)
+	public @ResponseBody List<ApproveLog> getApproveLogByWorkflowId(@RequestBody ApproveLogQuery approveLogQuery){
 		try {
-			Xf9System system = getXf9System(systemCode);
+			Xf9System system = getXf9System(approveLogQuery.getSystemCode());
 			if (system==null||system.getStatus()==1) {
 				return null;
 			}
-			List<ApproveLog> approveLogs = approveService.findApproveLogsByWorkfLowId(workflowId);
+			List<ApproveLog> approveLogs = approveService.findApproveLogsByWorkfLowId(approveLogQuery.getWorkflowId());
 			return approveLogs;
 		} catch (Exception e) {
 			

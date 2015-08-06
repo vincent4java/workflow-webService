@@ -7,12 +7,14 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.v4java.utils.DateUtil;
 import com.v4java.workflow.constant.WorkFlowErrorConst;
+import com.v4java.workflow.constat.WorkFLowMsg;
 import com.v4java.workflow.constat.WorkFLowMsgConst;
 import com.v4java.workflow.pojo.JobsUser;
 import com.v4java.workflow.pojo.WorkFlow;
@@ -38,22 +40,17 @@ public class WorkFlowAction extends BaseAction{
 	private static final Logger logger = Logger.getLogger(WorkFlowAction.class);
 	
 	@RequestMapping(value = "/insertWorkFlow")
-	public @ResponseBody WorkFLowMsgConst insertWorkFlow(){
+	public @ResponseBody WorkFLowMsg insertWorkFlow(){
 		return null;
 	}
 
 	
-	@RequestMapping(value = "/getWorkFlow/{systemCode}/{userCode}/{busyTypeId}/{offset}/{limit}")
-	public @ResponseBody BTables<WorkFlowVO> getWorkFlow(@PathVariable String systemCode,@PathVariable String userCode,@PathVariable Integer busyTypeId,@PathVariable Integer offset,@PathVariable Integer limit){
+	@RequestMapping(value = "/getWorkFlow",method = RequestMethod.POST)
+	public @ResponseBody BTables<WorkFlowVO> getWorkFlow(@RequestBody WorkFlowQuery workFlowQuery){
 		
-		WorkFlowQuery workFlowQuery = new WorkFlowQuery();
-		workFlowQuery.setUserCode(userCode);
-		workFlowQuery.setBusyTypeId(busyTypeId);
-		workFlowQuery.setOffset(offset);
-		workFlowQuery.setLimit(limit);
 		BTables<WorkFlowVO> bTables = new BTables<WorkFlowVO>();
 		try {
-			Xf9System system = getXf9System(systemCode);
+			Xf9System system = getXf9System(workFlowQuery.getSystemCode());
 			if (system==null||system.getStatus()==1) {
 				return null;
 			}
@@ -64,7 +61,7 @@ public class WorkFlowAction extends BaseAction{
 				workFlowVO.setUpdateTimeName(DateUtil.datetimeToStr(workFlowVO.getUpdateTime()));
 			}
 			int count = workFlowService.findUserWorkFlowVOCountByUserCodeAndSystemId(workFlowQuery);
-			if (workFlowVOs != null && workFlowVOs.size() !=0) {
+			if (workFlowVOs != null && count !=0) {
 				bTables.setRows(workFlowVOs);
 				bTables.setTotal(count);
 			}
@@ -77,53 +74,72 @@ public class WorkFlowAction extends BaseAction{
 	
 	
 	
-	@RequestMapping(value = "/submitWorkFlow/{systemCode}/{busyTypeId}/{userCode}/{userName}/{workFlowCode}/{json}")
-	public @ResponseBody WorkFLowMsgConst submitWorkFlow(@PathVariable String systemCode,@PathVariable Integer busyTypeId, @PathVariable String userCode, @PathVariable String userName, @PathVariable String  workFlowCode, @PathVariable String  json){
-		WorkFLowMsgConst workFLowMsgConst = new WorkFLowMsgConst();
+	@RequestMapping(value = "/submitWorkFlow",method = RequestMethod.POST)
+	public @ResponseBody WorkFLowMsg submitWorkFlow(@RequestBody WorkFlowQuery workFlowQuery){
+		WorkFLowMsg workFLowMsg = new WorkFLowMsg();
 		JobsUserQuery jobsUserQuery = new JobsUserQuery();
-		jobsUserQuery.setUserCode(userCode);
+		jobsUserQuery.setUserCode(workFlowQuery.getUserCode());
 		UserVO userVO = new UserVO();
-		userVO.setUserCode(userCode);
-		userVO.setUserName(userName);
+		userVO.setUserCode(workFlowQuery.getUserCode());
+		userVO.setUserName(workFlowQuery.getUserName());
 		WorkFlow flow = new WorkFlow();
-		flow.setBusyTypeId(busyTypeId);
-		flow.setJson(json);
-		flow.setWorkFlowCode(workFlowCode);
+		flow.setBusyTypeId(workFlowQuery.getBusyTypeId());
+		flow.setJson(workFlowQuery.getJson());
+		flow.setWorkFlowCode(workFlowQuery.getWorkFlowCode());
 		try {
-			Xf9System system = getXf9System(systemCode);
-			if (system==null||system.getStatus()==1) {
-				return null;
+			Xf9System system = getXf9System(workFlowQuery.getSystemCode());
+			if (system==null) {
+				//该系统不存在
+				workFLowMsg.setIsSuccess(WorkFlowErrorConst.SYSTEM_NOT);
+				workFLowMsg.setMsg(WorkFlowErrorConst.MSG[WorkFlowErrorConst.SYSTEM_NOT]);
+				return workFLowMsg;
 			}
-			
+			if (system.getStatus()==WorkFLowMsgConst.SYSTEM_FALSE) {
+				//该系统已被禁用
+				workFLowMsg.setIsSuccess(WorkFlowErrorConst.SYSTEM_FALSE);
+				workFLowMsg.setMsg(WorkFlowErrorConst.MSG[WorkFlowErrorConst.SYSTEM_NOT]);
+				return workFLowMsg;
+			}
 			jobsUserQuery.setSystemId(system.getId());
 			userVO.setSystemId(system.getId());
 			flow.setSystemId(system.getId());
+			flow.setName(workFlowQuery.getName());
 			setUerJobs(userVO);
 			int n =workFlowService.insertWorkFlow(flow, userVO);
-			workFLowMsgConst.setIsSuccess(n);
-			workFLowMsgConst.setWorkFlow(flow);
+			workFLowMsg.setIsSuccess(n);
+			workFLowMsg.setWorkFlow(flow);
 			if (n!=1) {
-				workFLowMsgConst.setMsg(WorkFlowErrorConst.MSG[-n]);
+				workFLowMsg.setMsg(WorkFlowErrorConst.MSG[-n]);
 			}
 		} catch (Exception e) {
-			logger.error("查询--"+systemCode+"--系统中用户"+userCode+"--"+userName+"待办审批任务错误", e);
+			logger.error("提交--"+workFlowQuery.getSystemCode()+"--系统中用户"+workFlowQuery.getUserCode()+"--"+workFlowQuery.getUserName()+"--"+workFlowQuery.getWorkFlowCode()+"审批任务错误", e);
+			workFLowMsg.setMsg("系统错误");
 		}
 		
-		return workFLowMsgConst;
+		return workFLowMsg;
 	}
 	
 	
-	@RequestMapping(value = "/agree/{systemCode}/{workFlowId}/{userCode}/{userName}/{isAgree}")
-	public @ResponseBody WorkFLowMsgConst agree(@PathVariable String systemCode,@PathVariable Integer workFlowId, @PathVariable String userCode,@PathVariable String userName,@PathVariable Integer isAgree){
-		WorkFLowMsgConst workFLowMsgConst = new WorkFLowMsgConst();
+	@RequestMapping(value = "/agree",method = RequestMethod.POST)
+	public @ResponseBody WorkFLowMsg agree(@RequestBody WorkFlowQuery workFlowQuery){
+		WorkFLowMsg workFLowMsg = new WorkFLowMsg();
 		UserVO userVO = new UserVO();
-		userVO.setUserCode(userCode);
-		userVO.setUserName(userName);
+		userVO.setUserCode(workFlowQuery.getUserCode());
+		userVO.setUserName(workFlowQuery.getUserName());
 		WorkFlow workFlow = new WorkFlow();
 		try {
-			Xf9System system = getXf9System(systemCode);
-			if (system==null||system.getStatus()==1) {
-				return null;
+			Xf9System system = getXf9System(workFlowQuery.getSystemCode());
+			if (system==null) {
+				//该系统不存在
+				workFLowMsg.setIsSuccess(WorkFlowErrorConst.SYSTEM_NOT);
+				workFLowMsg.setMsg(WorkFlowErrorConst.MSG[WorkFlowErrorConst.SYSTEM_NOT]);
+				return workFLowMsg;
+			}
+			if (system.getStatus()==WorkFLowMsgConst.SYSTEM_FALSE) {
+				//该系统已被禁用
+				workFLowMsg.setIsSuccess(WorkFlowErrorConst.SYSTEM_FALSE);
+				workFLowMsg.setMsg(WorkFlowErrorConst.MSG[WorkFlowErrorConst.SYSTEM_NOT]);
+				return workFLowMsg;
 			}
 			userVO.setSystemId(system.getId());
 			Integer n =null;
@@ -131,21 +147,31 @@ public class WorkFlowAction extends BaseAction{
 			if (userVO.getJobsIds()==null||userVO.getJobsIds().size()==0) {
 				n = WorkFlowErrorConst.USER_NO_JOBS;
 			}else {
-				workFlow.setId(workFlowId);
-				n = workFlowService.doWorkFlow(workFlow, userVO, isAgree);
-				workFLowMsgConst.setWorkFlow(workFlow);
+				workFlow.setId(workFlowQuery.getWorkFlowId());
+				n = workFlowService.doWorkFlow(workFlow, userVO, workFlowQuery.getAgree());
+				workFLowMsg.setWorkFlow(workFlow);
 			}
 			if (n!=null&&n!=1) {
-				workFLowMsgConst.setIsSuccess(n);
-				workFLowMsgConst.setMsg(WorkFlowErrorConst.MSG[-n]);
+				workFLowMsg.setIsSuccess(n);
+				workFLowMsg.setMsg(WorkFlowErrorConst.MSG[-n]);
 			}else {
-				workFLowMsgConst.setMsg("成功");
+				workFLowMsg.setMsg("成功");
 			}
-			workFLowMsgConst.setIsSuccess(n);
+			workFLowMsg.setIsSuccess(n);
 		} catch (Exception e) {
-			//logger.error("查询--"+systemId+"--系统中用户"+userCode+"--"+userName+"待办审批任务错误", e);
+			StringBuffer error = new StringBuffer();
+			error.append(workFlowQuery.getSystemCode());
+			error.append("系统中用户");
+			error.append(workFlowQuery.getUserCode());
+			error.append("--");
+			error.append(workFlowQuery.getUserName());
+			error.append("审批id为");
+			error.append(workFlowQuery.getWorkFlowId());
+			error.append("任务失败");
+			logger.error(error.toString(), e);
+			workFLowMsg.setMsg("系统错误");
 		}
-		return workFLowMsgConst;
+		return workFLowMsg;
 	}
 
 
