@@ -169,6 +169,7 @@ public class WorkFlowAction extends BaseAction{
 				workFLowMsg.setMsg("成功");
 			}
 			workFLowMsg.setIsSuccess(n);
+			workFLowMsg.setWorkFlow(workFlow);
 		} catch (Exception e) {
 			StringBuffer error = new StringBuffer();
 			error.append(workFlowQuery.getSystemCode());
