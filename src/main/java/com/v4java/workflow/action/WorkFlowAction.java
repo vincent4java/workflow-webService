@@ -156,8 +156,8 @@ public class WorkFlowAction extends BaseAction{
 					flowParam= workFlowService.deleteWorkflow(workFlow, userVO);
 				}
 				n = flowParam.getCount();
-				workFLowMsg.setWorkFlow(workFlow);
 			}
+			workFlow.setStatus(flowParam.getNowStatus());
 			if (n!=null&&n!=1) {
 				workFLowMsg.setIsSuccess(n);
 				workFLowMsg.setMsg(WorkFlowErrorConst.MSG[-n]);
