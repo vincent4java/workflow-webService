@@ -1,6 +1,5 @@
 package com.v4java.workflow.action;
 
-import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +38,8 @@ public class BaseAction {
 		JobsUserQuery jobsUserQuery = new JobsUserQuery();
 		jobsUserQuery.setSystemId(userVO.getSystemId());
 		jobsUserQuery.setUserCode(userVO.getUserCode());
-		String json = JedisUtil.getInstance().hget(systemCode+":"+userVO.getUserCode(),"userVO");
+		String json = null;
+		/*String json = JedisUtil.getInstance().hget(systemCode+":"+userVO.getUserCode(),"userVO");*/
 		if (json==null) {
 			List<Integer> jobIds = new ArrayList<Integer>();
 			List<JobsUser> jobsUsers = jobsUserService.findjobsUserByUserCodeAndSystemId(jobsUserQuery);

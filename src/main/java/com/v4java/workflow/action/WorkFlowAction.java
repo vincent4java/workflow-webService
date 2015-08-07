@@ -15,10 +15,12 @@ import com.v4java.utils.DateUtil;
 import com.v4java.workflow.constant.WorkFlowErrorConst;
 import com.v4java.workflow.constat.WorkFLowMsg;
 import com.v4java.workflow.constat.WorkFLowMsgConst;
+import com.v4java.workflow.param.webservice.WorkFlowParam;
 import com.v4java.workflow.pojo.WorkFlow;
 import com.v4java.workflow.pojo.Xf9System;
 import com.v4java.workflow.query.webservice.JobsUserQuery;
 import com.v4java.workflow.query.webservice.WorkFlowQuery;
+import com.v4java.workflow.redis.util.JedisUtil;
 import com.v4java.workflow.service.webservice.IWorkFlowService;
 import com.v4java.workflow.vo.BTables;
 import com.v4java.workflow.vo.webservice.UserVO;
@@ -106,6 +108,10 @@ public class WorkFlowAction extends BaseAction{
 			if (n!=1) {
 				workFLowMsg.setMsg(WorkFlowErrorConst.MSG[-n]);
 			}
+			if (n==1) {
+				JedisUtil.getInstance().hincrby("system:"+workFlowQuery.getSystemCode(), flow.getJobsId()+":"+workFlowQuery.getBusyTypeId()+":num", 1);
+			}
+			//JedisUtil.getInstance().hincrby("system:"+workFlowQuery.getSystemCode(), "type:"+workFlowQuery.getBusyTypeId()+":money", 1);
 		} catch (Exception e) {
 			logger.error("提交--"+workFlowQuery.getSystemCode()+"--系统中用户"+workFlowQuery.getUserCode()+"--"+workFlowQuery.getUserName()+"--"+workFlowQuery.getWorkFlowCode()+"审批任务错误", e);
 			workFLowMsg.setMsg("系统错误");
@@ -137,19 +143,29 @@ public class WorkFlowAction extends BaseAction{
 				return workFLowMsg;
 			}
 			Integer n =null;
+			WorkFlowParam flowParam= null; 
 			userVO.setSystemId(system.getId());
 			setUerJobs(userVO,workFlowQuery.getSystemCode());
 			if (userVO.getJobsIds()==null||userVO.getJobsIds().size()==0) {
 				n = WorkFlowErrorConst.USER_NO_JOBS;
 			}else {
 				workFlow.setId(workFlowQuery.getWorkFlowId());
-				n = workFlowService.doWorkFlow(workFlow, userVO, workFlowQuery.getAgree());
+				if (workFlowQuery.getAgree()!=2) {
+					flowParam = workFlowService.doWorkFlow(workFlow, userVO, workFlowQuery.getAgree());
+				}else {
+					flowParam= workFlowService.deleteWorkflow(workFlow, userVO);
+				}
+				n = flowParam.getCount();
 				workFLowMsg.setWorkFlow(workFlow);
 			}
 			if (n!=null&&n!=1) {
 				workFLowMsg.setIsSuccess(n);
 				workFLowMsg.setMsg(WorkFlowErrorConst.MSG[-n]);
 			}else {
+				JedisUtil.getInstance().hincrby("system:"+workFlowQuery.getSystemCode(), workFlowQuery.getBusyTypeId()+":"+flowParam.getOldJobsId(), -1);
+				if (flowParam.getIsDelete()!=1) {
+					JedisUtil.getInstance().hincrby("system:"+workFlowQuery.getSystemCode(), workFlowQuery.getBusyTypeId()+":"+flowParam.getNowJobsId(), 1);
+				}
 				workFLowMsg.setMsg("成功");
 			}
 			workFLowMsg.setIsSuccess(n);

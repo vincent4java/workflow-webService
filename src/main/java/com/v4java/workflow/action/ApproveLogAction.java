@@ -2,6 +2,7 @@ package com.v4java.workflow.action;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
@@ -22,6 +23,7 @@ public class ApproveLogAction extends BaseAction{
 	@Autowired
 	private IApproveService approveService;
 
+	private static final Logger logger = Logger.getLogger(ApproveLogAction.class);
 
 	@RequestMapping(value = "/getApproveLogByWorkflowId",method = RequestMethod.POST)
 	public @ResponseBody List<ApproveLog> getApproveLogByWorkflowId(@RequestBody ApproveLogQuery approveLogQuery){
@@ -33,7 +35,7 @@ public class ApproveLogAction extends BaseAction{
 			List<ApproveLog> approveLogs = approveService.findApproveLogsByWorkfLowId(approveLogQuery.getWorkflowId());
 			return approveLogs;
 		} catch (Exception e) {
-			
+			logger.error("查看"+approveLogQuery.getWorkflowId()+"审批日志错误", e);
 		}
 		return null;
 	}
