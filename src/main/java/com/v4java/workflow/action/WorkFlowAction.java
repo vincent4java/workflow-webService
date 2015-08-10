@@ -107,6 +107,8 @@ public class WorkFlowAction extends BaseAction{
 			workFLowMsg.setWorkFlow(flow);
 			if (n!=1) {
 				workFLowMsg.setMsg(WorkFlowErrorConst.MSG[-n]);
+			}else {
+				workFLowMsg.setMsg("成功");
 			}
 			if (n==1) {
 				JedisUtil.getInstance().hincrby("system:"+workFlowQuery.getSystemCode(), flow.getJobsId()+":"+workFlowQuery.getBusyTypeId()+":num", 1);

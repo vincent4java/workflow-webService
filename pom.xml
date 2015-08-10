@@ -14,12 +14,6 @@
 	<dependencies>
 		<!-- 工具包 -->
 		<dependency>
-			<groupId>com.vincent</groupId>
-			<artifactId>v4java-web-utils</artifactId>
-		</dependency>
-		<!-- -->
-
-		<dependency>
 			<groupId>com.v4java</groupId>
 			<artifactId>workflow-service</artifactId>
 		</dependency>

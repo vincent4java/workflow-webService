@@ -50,7 +50,8 @@ public class BaseAction {
 			}
 			
 			userVO.setJobsIds(jobIds);
-			JedisUtil.getInstance().hset(systemCode+":"+userVO.getUserCode(), "userVO", JSON.toJSONString(userVO));
+/*			JedisUtil.getInstance().hdel(systemCode+":"+userVO.getUserCode(),"userVO");
+			JedisUtil.getInstance().hset(systemCode+":"+userVO.getUserCode(), "userVO", JSON.toJSONString(userVO));*/
 		}else {
 			UserVO userVOT = JSON.parseObject(json, UserVO.class);
 			userVO.setJobsIds(userVOT.getJobsIds());
