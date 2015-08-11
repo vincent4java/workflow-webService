@@ -26,6 +26,7 @@ public class BaseAction {
 		Xf9System system = null;
 		String json = JedisUtil.getInstance().hget("system:" + systemCode,"ObJson");
 		system = JSON.parseObject(json, Xf9System.class);
+		system = xf9SystemService.findXf9SystemBySystemCode(systemCode);
 		if (system == null) {
 			system = xf9SystemService.findXf9SystemBySystemCode(systemCode);
 			JedisUtil.getInstance().hset("system:" + systemCode, "ObJson",JSON.toJSONString(system));
