@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.alibaba.fastjson.JSON;
 import com.v4java.workflow.pojo.JobsUser;
 import com.v4java.workflow.pojo.Xf9System;
 import com.v4java.workflow.query.webservice.JobsUserQuery;
@@ -52,10 +51,6 @@ public class BaseAction {
 			userVO.setJobsIds(jobIds);
 /*			JedisUtil.getInstance().hdel(systemCode+":"+userVO.getUserCode(),"userVO");
 			JedisUtil.getInstance().hset(systemCode+":"+userVO.getUserCode(), "userVO", JSON.toJSONString(userVO));*/
-		}else {
-			UserVO userVOT = JSON.parseObject(json, UserVO.class);
-			userVO.setJobsIds(userVOT.getJobsIds());
 		}
-	
 	}
 }
