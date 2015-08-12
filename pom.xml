@@ -17,10 +17,10 @@
 			<groupId>com.v4java</groupId>
 			<artifactId>workflow-service</artifactId>
 		</dependency>
-		<dependency>
+<!-- 		<dependency>
 		  	<groupId>com.v4java</groupId>
  			 <artifactId>workflow-redis</artifactId>
-  		</dependency>
+  		</dependency> -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>

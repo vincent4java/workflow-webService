@@ -9,7 +9,6 @@ import com.alibaba.fastjson.JSON;
 import com.v4java.workflow.pojo.JobsUser;
 import com.v4java.workflow.pojo.Xf9System;
 import com.v4java.workflow.query.webservice.JobsUserQuery;
-import com.v4java.workflow.redis.util.JedisUtil;
 import com.v4java.workflow.service.webservice.IJobsUserService;
 import com.v4java.workflow.service.webservice.IXf9SystemService;
 import com.v4java.workflow.vo.webservice.UserVO;
@@ -23,15 +22,15 @@ public class BaseAction {
 	private IJobsUserService jobsUserService;
 	
 	Xf9System getXf9System(String systemCode) throws Exception {
-		Xf9System system = null;
+/*		Xf9System system = null;
 		String json = JedisUtil.getInstance().hget("system:" + systemCode,"ObJson");
 		system = JSON.parseObject(json, Xf9System.class);
 		system = xf9SystemService.findXf9SystemBySystemCode(systemCode);
 		if (system == null) {
 			system = xf9SystemService.findXf9SystemBySystemCode(systemCode);
 			JedisUtil.getInstance().hset("system:" + systemCode, "ObJson",JSON.toJSONString(system));
-		}
-		return system;
+		}*/
+		return xf9SystemService.findXf9SystemBySystemCode(systemCode);
 	}
 	
 	
